@@ -1,0 +1,42 @@
+groups:
+  - name: system_alerts
+    rules:
+      # Target Availability
+      - alert: InstanceDown
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "Target {{ $labels.instance }} has been down for more than 2 minutes."
+
+      # Saturation: CPU Usage Alert
+      - alert: HostCpuUsageHigh
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host High CPU Usage"
+          description: "CPU usage on {{ $labels.instance }} has exceeded 85% for 5 minutes."
+
+      # Saturation: Memory Usage Alert
+      - alert: HostMemoryUsageHigh
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host High Memory Usage"
+          description: "Memory usage on {{ $labels.instance }} has exceeded 90% for 5 minutes."
+
+      # Saturation: Disk Space Alert
+      - alert: HostDiskSpaceRunningLow
+        expr: (node_filesystem_free_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 10
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Host Disk Space Running Low"
+          description: "Free disk space on mountpoint '/' of {{ $labels.instance }} is below 10%."

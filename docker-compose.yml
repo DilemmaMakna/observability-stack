@@ -1,0 +1,201 @@
+services:
+  # Section: Metrics System (Prometheus)
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION}
+    container_name: lemma-prometheus
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION_TIME}'
+      - '--storage.tsdb.retention.size=${PROMETHEUS_RETENTION_SIZE}'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1200M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+
+  # Section: Logs System (Loki)
+  loki:
+    image: grafana/loki:${LOKI_VERSION}
+    container_name: lemma-loki
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    ports:
+      - "${LOKI_PORT}:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    command: -config.file=/etc/loki/loki-config.yml
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1000M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+
+  # Section: Log Shipper (Promtail)
+  promtail:
+    image: grafana/promtail:${PROMTAIL_VERSION}
+    container_name: lemma-promtail
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      # Access host docker logs
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Promtail positions file storage
+      - promtail-data:/run/promtail
+    command: -config.file=/etc/promtail/promtail-config.yml
+    deploy:
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 150M
+        reservations:
+          cpus: '0.05'
+          memory: 32M
+
+  # Section: Host Metrics Exporter
+  node-exporter:
+    image: prom/node-exporter:${NODE_EXPORTER_VERSION}
+    container_name: lemma-node-exporter
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro,rslave
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    deploy:
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 50M
+        reservations:
+          cpus: '0.02'
+          memory: 16M
+
+  # Section: Container Metrics Exporter
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION}
+    container_name: lemma-cadvisor
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    deploy:
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 150M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+
+  # Section: Visualization (Grafana)
+  grafana:
+    image: grafana/grafana:${GRAFANA_VERSION}
+    container_name: lemma-grafana
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./dashboards:/etc/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin # User should change this on first login
+      - GF_USERS_ALLOW_SIGN_UP=false
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 400M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+
+  # Section: AI Application Service (Simulated)
+  ai-service:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: lemma-ai-service
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 800M
+        reservations:
+          cpus: '0.10'
+          memory: 128M
+
+networks:
+  monitor-net:
+    name: lemma_observability_network
+    driver: bridge
+
+volumes:
+  prometheus-data:
+    name: lemma_prometheus_data
+  loki-data:
+    name: lemma_loki_data
+  promtail-data:
+    name: lemma_promtail_data
+  grafana-data:
+    name: lemma_grafana_data

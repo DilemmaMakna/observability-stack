@@ -1,0 +1,97 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /run/promtail/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Scrape Host System Logs
+  - job_name: system-logs
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: system-syslog
+          host: localhost
+          __path__: /var/log/syslog
+          
+  - job_name: auth-logs
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: system-auth
+          host: localhost
+          __path__: /var/log/auth.log
+
+  # Scrape Docker Containers Logs
+  - job_name: docker-containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 10s
+    relabel_configs:
+      # Map Container Name (Removing Leading Slash)
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      # Map Docker Image Name
+      - source_labels: ['__meta_docker_image_name']
+        target_label: 'image'
+      # Map Stdout/Stderr Stream
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+      # Custom Label For Grouping Jobs, Fallback To Container Name If Missing
+      - source_labels: ['__meta_docker_container_label_logging_job']
+        target_label: 'job'
+      - source_labels: ['job']
+        regex: ''
+        replacement: 'docker-container-logs'
+        target_label: 'job'
+
+    # Pipelines For Structured Log Categorization
+    pipeline_stages:
+      # Step 1: Docker Format Wrapper Parser (Gets Timestamp, Stream, And Log Fields)
+      - docker: {}
+
+      # Step 2: Try Parsing 'log' Payload As JSON (Common For Backend And AI Apps)
+      - json:
+          source: log
+          expressions:
+            json_level: level
+            json_lvl: lvl
+            json_service: service
+            json_msg: msg
+            json_message: message
+
+      # Step 3: Regular Expression Fallback For Log Levels (Logfmt Or Plain Text)
+      - regex:
+          source: log
+          expression: '(?i)level=(?P<regex_level>[a-zA-Z]+)'
+      - regex:
+          source: log
+          expression: '(?i)\[?(?P<bracket_level>INFO|WARN|ERROR|DEBUG|FATAL|CRITICAL|WARNING)\]?'
+
+      # Step 4: Normalization And Consolidation Of Extracted Fields
+      - template:
+          source: level
+          template: '{{ if .json_level }}{{ .json_level }}{{ else if .json_lvl }}{{ .json_lvl }}{{ else if .regex_level }}{{ .regex_level }}{{ else if .bracket_level }}{{ .bracket_level }}{{ else }}INFO{{ end }}'
+      
+      - template:
+          source: level
+          template: '{{ Upcase .level }}'
+
+      # Standardize WARNING To WARN
+      - template:
+          source: level
+          template: '{{ if eq .level "WARNING" }}WARN{{ else }}{{ .level }}{{ end }}'
+
+      - template:
+          source: service
+          template: '{{ if .json_service }}{{ .json_service }}{{ else }}{{ .container }}{{ end }}'
+
+      # Step 5: Export Labels Back To Loki
+      - labels:
+          level:
+          service:
