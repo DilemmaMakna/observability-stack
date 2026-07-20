@@ -72,8 +72,7 @@ backup_configs() {
     loki/ \
     promtail/ \
     grafana/ \
-    dashboards/ \
-    app/
+    dashboards/
     
   log_info "Config backup saved to: ${config_archive}"
 }

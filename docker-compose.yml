@@ -192,34 +192,6 @@ services:
         reservations:
           cpus: '0.05'
           memory: 64M
-
-  # Section: AI Application Service (Simulated)
-  ai-service:
-    build:
-      context: ./app
-      dockerfile: Dockerfile
-    container_name: lemma-ai-service
-    restart: unless-stopped
-    security_opt:
-      - no-new-privileges:true
-    networks:
-      - monitor-net
-    ports:
-      - "127.0.0.1:${AI_PORT}:8000"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    deploy:
-      resources:
-        limits:
-          cpus: '${AI_SERVICE_CPU_LIMIT}'
-          memory: ${AI_SERVICE_MEM_LIMIT}
-        reservations:
-          cpus: '0.10'
-          memory: 128M
-
 networks:
   monitor-net:
     name: lemma_observability_network
