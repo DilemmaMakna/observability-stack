@@ -33,12 +33,12 @@ scrape_configs:
       - source_labels: [__address__]
         target_label: instance
 
-  # Placeholder For AI/Inference Service Metrics
+  # Performance Monitoring for AI/Inference Service
   - job_name: 'ai-service'
     metrics_path: '/metrics'
     scrape_interval: 15s
     static_configs:
-      - targets: ['ai-app:8000'] # Change to actual AI host and port
+      - targets: ['ai-service:8000']
     relabel_configs:
       - source_labels: [__address__]
         target_label: instance

@@ -86,20 +86,20 @@ The Promtail pipeline parses logs to extract metadata for Loki:
 
 ## AI Application Observability
 
-High cardinality metadata fields like token counts and prompt logs are kept in the log payload rather than being indexed as labels. This preserves Loki database performance. These metrics are queried via LogQL.
+High cardinality metadata fields like token counts and prompt logs are kept in the log payload rather than being indexed as labels. This preserves Loki database performance. The log fields follow the OpenTelemetry GenAI Semantic Conventions. These metrics are queried via LogQL.
 
 ### LogQL Examples
 
 To sum total tokens used:
 
 ```logql
-sum(sum_over_time({container="lemma-ai-service"} | json | unwrap tokens_used [$__interval]))
+sum(sum_over_time({container="lemma-ai-service"} | json | unwrap `gen_ai.usage.total_tokens` [$__interval]))
 ```
 
 To filter logs containing tool executions:
 
 ```logql
-{container="lemma-ai-service"} | json | tool_calls != "[]"
+{container="lemma-ai-service"} | json | `gen_ai.tool_calls` != "[]"
 ```
 
 To isolate logs for a specific request trace:

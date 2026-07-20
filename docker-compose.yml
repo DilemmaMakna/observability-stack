@@ -9,7 +9,12 @@ services:
     networks:
       - monitor-net
     ports:
-      - "${PROMETHEUS_PORT}:9090"
+      - "127.0.0.1:${PROMETHEUS_PORT}:9090"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
@@ -41,7 +46,12 @@ services:
     networks:
       - monitor-net
     ports:
-      - "${LOKI_PORT}:3100"
+      - "127.0.0.1:${LOKI_PORT}:3100"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki-data:/loki
@@ -64,6 +74,11 @@ services:
       - no-new-privileges:true
     networks:
       - monitor-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
       # Access host docker logs
@@ -91,6 +106,11 @@ services:
       - no-new-privileges:true
     networks:
       - monitor-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -118,6 +138,11 @@ services:
       - no-new-privileges:true
     networks:
       - monitor-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -146,6 +171,11 @@ services:
       - monitor-net
     ports:
       - "${GRAFANA_PORT}:3000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     volumes:
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
@@ -176,6 +206,11 @@ services:
       - monitor-net
     ports:
       - "8000:8000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     deploy:
       resources:
         limits:

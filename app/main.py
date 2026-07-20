@@ -5,16 +5,20 @@ from typing import Dict, List, Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from pythonjsonlogger import jsonlogger
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Initialize FastAPI Application
 app = FastAPI(title="Lemma AI Service")
+
+# Instrument Application to Expose /metrics
+Instrumentator().instrument(app).expose(app)
 
 # Setup Structured JSON Logging
 logger = logging.getLogger("lemma-ai-service")
 logger.setLevel(logging.INFO)
 log_handler = logging.StreamHandler()
 formatter = jsonlogger.JsonFormatter(
-    "%(timestamp)s %(level)s %(service)s %(message)s %(model)s %(tokens_used)s %(prompt_tokens)s %(completion_tokens)s %(rag_docs)s %(tool_calls)s %(trace_id)s"
+    "%(timestamp)s %(level)s %(service)s %(message)s"
 )
 log_handler.setFormatter(formatter)
 logger.addHandler(log_handler)
@@ -22,7 +26,7 @@ logger.addHandler(log_handler)
 # Request Models
 class ChatRequest(BaseModel):
     prompt: str
-    model: str = "gpt-4o"
+    model: str = "gpt-5.4-mini"
 
 # Mock Database for RAG
 KNOWLEDGE_BASE = {
@@ -83,13 +87,14 @@ async def chat(request: ChatRequest):
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "level": "INFO",
             "service": "ai-service",
-            "model": request.model,
-            "tokens_used": total_tokens,
-            "prompt_tokens": prompt_tokens,
-            "completion_tokens": completion_tokens,
-            "rag_docs": retrieved_docs,
-            "tool_calls": tool_calls,
-            "trace_id": trace_id
+            "trace_id": trace_id,
+            "gen_ai.response.model": request.model,
+            "gen_ai.usage.prompt_tokens": prompt_tokens,
+            "gen_ai.usage.completion_tokens": completion_tokens,
+            "gen_ai.usage.total_tokens": total_tokens,
+            "gen_ai.latency_seconds": duration,
+            "gen_ai.rag.documents": retrieved_docs,
+            "gen_ai.tool_calls": tool_calls
         }
     )
     
