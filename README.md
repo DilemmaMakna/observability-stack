@@ -1,5 +1,11 @@
 # Lemma Observability Stack
 
+[![Grafana](https://img.shields.io/badge/Grafana-v11.1.0-orange?logo=grafana)](https://grafana.com)
+[![Prometheus](https://img.shields.io/badge/Prometheus-v2.53.0-red?logo=prometheus)](https://prometheus.io)
+[![Loki](https://img.shields.io/badge/Loki-v3.0.0-blue?logo=grafana)](https://grafana.com/oss/loki/)
+[![Docker](https://img.shields.io/badge/Docker-Stack-blue?logo=docker)](https://www.docker.com)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue)](https://opensource.org/licenses/Apache-2.0)
+
 This repository provides an enterprise grade, resource efficient observability stack designed for production environments. It implements full monitoring of the four golden signals (latency, traffic, errors, and saturation) and establishes log ingestion standards for containerized applications and AI services.
 
 ## Architecture
