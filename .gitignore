@@ -1,0 +1,21 @@
+# Environment configuration
+.env
+
+# Backup archives
+backup/archive/
+
+# Python caching and virtualenv files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# OS metadata
+.DS_Store
+Thumbs.db
