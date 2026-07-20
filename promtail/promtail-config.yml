@@ -80,7 +80,7 @@ scrape_configs:
       
       - template:
           source: level
-          template: '{{ Upcase .level }}'
+          template: '{{ ToUpper .level }}'
 
       # Standardize WARNING To WARN
       - template:
