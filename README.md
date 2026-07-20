@@ -73,7 +73,7 @@ curl -X POST "http://localhost:8000/api/chat" \
      -d '{"prompt": "Tell me about prometheus and system status", "model": "gpt-4o"}'
 ```
 
-The system automatically provisions the custom metrics and logs dashboards.
+The system automatically provisions the custom metrics, logs, and AI performance dashboards.
 
 ### Deployment on Dokploy
 

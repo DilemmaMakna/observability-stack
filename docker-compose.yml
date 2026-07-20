@@ -30,8 +30,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.00'
-          memory: 1200M
+          cpus: '${PROMETHEUS_CPU_LIMIT}'
+          memory: ${PROMETHEUS_MEM_LIMIT}
         reservations:
           cpus: '0.10'
           memory: 128M
@@ -59,8 +59,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.00'
-          memory: 1000M
+          cpus: '${LOKI_CPU_LIMIT}'
+          memory: ${LOKI_MEM_LIMIT}
         reservations:
           cpus: '0.10'
           memory: 128M
@@ -91,8 +91,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.40'
-          memory: 150M
+          cpus: '${PROMTAIL_CPU_LIMIT}'
+          memory: ${PROMTAIL_MEM_LIMIT}
         reservations:
           cpus: '0.05'
           memory: 32M
@@ -123,8 +123,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.20'
-          memory: 50M
+          cpus: '${NODE_EXPORTER_CPU_LIMIT}'
+          memory: ${NODE_EXPORTER_MEM_LIMIT}
         reservations:
           cpus: '0.02'
           memory: 16M
@@ -154,8 +154,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.40'
-          memory: 150M
+          cpus: '${CADVISOR_CPU_LIMIT}'
+          memory: ${CADVISOR_MEM_LIMIT}
         reservations:
           cpus: '0.05'
           memory: 64M
@@ -182,13 +182,13 @@ services:
       - ./dashboards:/etc/grafana/dashboards:ro
       - grafana-data:/var/lib/grafana
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin # User should change this on first login
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
     deploy:
       resources:
         limits:
-          cpus: '0.50'
-          memory: 400M
+          cpus: '${GRAFANA_CPU_LIMIT}'
+          memory: ${GRAFANA_MEM_LIMIT}
         reservations:
           cpus: '0.05'
           memory: 64M
@@ -214,8 +214,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.00'
-          memory: 800M
+          cpus: '${AI_SERVICE_CPU_LIMIT}'
+          memory: ${AI_SERVICE_MEM_LIMIT}
         reservations:
           cpus: '0.10'
           memory: 128M

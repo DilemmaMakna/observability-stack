@@ -6,8 +6,15 @@ IFS=$'\n\t'
 
 # Configuration Variables
 STACK_DIR="/home/ubuntu/lemma/observability-stack"
+
+# Load environment variables if .env file exists
+if [ -f "${STACK_DIR}/.env" ]; then
+  # shellcheck disable=SC1090
+  source "${STACK_DIR}/.env"
+fi
+
 BACKUP_DIR="${STACK_DIR}/backup/archive"
-RETENTION_DAYS=7
+RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-7}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Target Volumes to Backup
