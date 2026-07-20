@@ -62,7 +62,7 @@ docker compose up -d --build
 
 ### Step 3: Access Ports
 
-1. Grafana: `http://localhost:3000` (Default credentials: admin / your password)
+1. Grafana: `http://localhost:3030` (Default credentials: admin / your password)
 2. AI Service: `http://localhost:8000/docs` (Interactive API documentation)
 
 Generate sample logs and metrics by executing a request to the chat endpoint:
@@ -74,6 +74,15 @@ curl -X POST "http://localhost:8000/api/chat" \
 ```
 
 The system automatically provisions the custom metrics and logs dashboards.
+
+### Deployment on Dokploy
+
+This stack is production ready for Dokploy deployment using Traefik:
+
+1. Create a Docker Compose application in your Dokploy panel.
+2. Connect your Git repository.
+3. Configure domains for your services using the Dokploy UI. Map your Grafana domain to the `grafana` service on container port `3000`. Map your API domain to the `ai-service` service on container port `8000`.
+4. Deploy the stack. Dokploy handles the Traefik routing, TLS certificate generation, and network isolation automatically.
 
 ## Log Categorization and Ingestion
 

@@ -170,7 +170,7 @@ services:
     networks:
       - monitor-net
     ports:
-      - "${GRAFANA_PORT}:3000"
+      - "127.0.0.1:${GRAFANA_PORT}:3000"
     logging:
       driver: "json-file"
       options:
