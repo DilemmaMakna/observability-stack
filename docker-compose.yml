@@ -51,10 +51,10 @@ services:
     command: -config.file=/etc/loki/loki-config.yml
 
 
-  # Section: Log Shipper (Promtail)
-  promtail:
-    image: grafana/promtail:${PROMTAIL_VERSION}
-    container_name: lemma-promtail
+  # Section: Unified Log Collector (Grafana Alloy)
+  alloy:
+    image: grafana/alloy:${ALLOY_VERSION}
+    container_name: lemma-alloy
     user: root
     restart: unless-stopped
     security_opt:
@@ -67,14 +67,10 @@ services:
         max-size: "10m"
         max-file: "3"
     volumes:
-      - ./promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
-      # Access host docker logs
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/log:/var/log:ro
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Promtail positions file storage
-      - promtail-data:/run/promtail
-    command: -config.file=/etc/promtail/promtail-config.yml
+      - alloy-data:/var/lib/alloy/data
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
 
 
   # Section: Host Metrics Exporter
@@ -181,7 +177,7 @@ volumes:
     name: lemma_prometheus_data
   loki-data:
     name: lemma_loki_data
-  promtail-data:
-    name: lemma_promtail_data
+  alloy-data:
+    name: lemma_alloy_data
   grafana-data:
     name: lemma_grafana_data

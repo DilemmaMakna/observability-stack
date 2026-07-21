@@ -1,0 +1,102 @@
+// Discover Docker containers running on the host
+discovery.docker "docker_containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Filter and relabel targets (adds container and stream labels)
+discovery.relabel "docker_targets" {
+  targets = discovery.docker.docker_containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label  = "stream"
+  }
+
+  rule {
+    target_label  = "job"
+    replacement   = "docker-container-logs"
+  }
+}
+
+// Scrape logs directly from the Docker daemon socket
+loki.source.docker "docker_logs" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.docker_targets.output
+  forward_to = [loki.process.log_pipeline.receiver]
+}
+
+// Process log entries (extract levels, format, and add labels)
+loki.process "log_pipeline" {
+  forward_to = [loki.write.loki_endpoint.receiver]
+
+  // Stage 1: Try parsing message payload as JSON
+  stage.json {
+    expressions = {
+      json_level   = "level",
+      json_lvl     = "lvl",
+      json_service = "service",
+      json_msg     = "msg",
+      json_message = "message",
+    }
+  }
+
+  // Stage 2: Try parsing message payload as Logfmt
+  stage.logfmt {
+    mapping = {
+      logfmt_level   = "level",
+      logfmt_lvl     = "lvl",
+      logfmt_service = "service",
+      logfmt_msg     = "msg",
+      logfmt_message = "message",
+    }
+  }
+
+  // Stage 3: Match level at start of line
+  stage.regex {
+    expression = "^(info|warn|error|debug|critical|panic|fatal|info|warn|err|dbug|crit)[^a-zA-Z0-9]"
+  }
+
+  // Stage 4: Match bracket level [INFO]
+  stage.regex {
+    expression = "\\[(INFO|WARN|ERROR|DEBUG|CRITICAL|PANIC|FATAL|info|warn|error|debug|critical)\\]"
+  }
+
+  // Stage 5: Select the first successfully parsed log level, default to info
+  stage.template {
+    source   = "level"
+    template = "{{ if .json_level }}{{ .json_level }}{{ else if .json_lvl }}{{ .json_lvl }}{{ else if .logfmt_level }}{{ .logfmt_level }}{{ else if .logfmt_lvl }}{{ .logfmt_lvl }}{{ else if .regex_level }}{{ .regex_level }}{{ else if .bracket_level }}{{ .bracket_level }}{{ else }}info{{ end }}"
+  }
+
+  // Stage 6: Normalize level to lowercase
+  stage.template {
+    source   = "level"
+    template = "{{ .level | ToLower }}"
+  }
+
+  // Stage 7: Standardize warning and err to warn and error
+  stage.template {
+    source   = "level"
+    template = "{{ if eq .level \"warning\" }}warn{{ else if eq .level \"err\" }}error{{ else }}{{ .level }}{{ end }}"
+  }
+
+  // Stage 8: Expose level and service as Loki labels
+  stage.labels {
+    values = {
+      level   = "level",
+      service = "json_service",
+    }
+  }
+}
+
+// Write the processed log streams to Loki
+loki.write "loki_endpoint" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
