@@ -23,254 +23,300 @@
   "panels": [
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 0,
-        "y": 0
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+      "id": 100,
+      "title": "Google SRE Golden Signal 1: Latency (LLM Gen & RAG Phase)",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 1 },
       "id": 1,
-      "title": "Total Tokens Used",
-      "type": "stat",
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
+      "title": "LLM Generation Latency Percentiles (P50, P90, P99)",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
         {
-          "datasource": {
-            "type": "loki",
-            "uid": "Loki"
-          },
+          "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({container=\"lemma-ai-service\"} | json | unwrap `gen_ai.usage.total_tokens` [$__interval]))",
+          "expr": "quantile_over_time(0.99, {job=\"docker-container-logs\"} | json | unwrap `gen_ai.latency_seconds` [$__interval])",
+          "legendFormat": "p99 LLM Latency",
           "refId": "A"
+        },
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "quantile_over_time(0.90, {job=\"docker-container-logs\"} | json | unwrap `gen_ai.latency_seconds` [$__interval])",
+          "legendFormat": "p90 LLM Latency",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "quantile_over_time(0.50, {job=\"docker-container-logs\"} | json | unwrap `gen_ai.latency_seconds` [$__interval])",
+          "legendFormat": "p50 LLM Latency (Median)",
+          "refId": "C"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
+          "unit": "s",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
       }
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 8,
-        "y": 0
-      },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 1 },
       "id": 2,
-      "title": "Average LLM Latency",
-      "type": "stat",
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
+      "title": "RAG Document Retrieval Latency",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
         {
-          "datasource": {
-            "type": "loki",
-            "uid": "Loki"
-          },
+          "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({container=\"lemma-ai-service\"} | json | unwrap `gen_ai.latency_seconds` [$__interval]))",
+          "expr": "avg(avg_over_time({job=\"docker-container-logs\"} | json | unwrap `rag_latency_seconds` [$__interval]))",
+          "legendFormat": "Avg Retrieval Latency",
           "refId": "A"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "s",
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1.5
-              },
-              {
-                "color": "red",
-                "value": 3.0
-              }
-            ]
-          }
-        },
-        "overrides": []
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
       }
     },
     {
       "collapsed": false,
-      "gridPos": {
-        "h": 4,
-        "w": 8,
-        "x": 16,
-        "y": 0
-      },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
+      "id": 200,
+      "title": "Google SRE Golden Signal 2: Traffic (Token Volume & Financial Spend)",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 8 },
       "id": 3,
-      "title": "Total Tool Calls Executed",
-      "type": "stat",
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "Loki"
-          },
-          "editorMode": "code",
-          "expr": "sum(count_over_time({container=\"lemma-ai-service\"} | json | `gen_ai.tool_calls` != \"[]\" [$__interval]))",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "blue",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 4
-      },
-      "id": 4,
-      "title": "HTTP Request Rate & Status",
+      "title": "Token Throughput (Input vs. Output Tokens)",
       "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
+      "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
+          "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(rate(http_requests_total[5m])) by (status)",
-          "legendFormat": "Status {{status}}",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth"
-          }
-        }
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 4
-      },
-      "id": 5,
-      "title": "HTTP Latency (p95 & p99)",
-      "type": "timeseries",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "Prometheus"
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
-          "editorMode": "code",
-          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p99 Latency",
+          "expr": "sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.input_tokens` [$__interval]))",
+          "legendFormat": "Input Tokens",
           "refId": "A"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "Prometheus"
-          },
+          "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95 Latency",
+          "expr": "sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.output_tokens` [$__interval]))",
+          "legendFormat": "Output Tokens",
           "refId": "B"
         }
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth"
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "title": "Estimated Dollar Spend Trend (USD)",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.input_tokens` [$__interval])) * 0.0000015 + sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.output_tokens` [$__interval])) * 0.000002",
+          "legendFormat": "Estimated Spend ($)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
+      "id": 300,
+      "title": "Google SRE Golden Signal 3: Errors (Failures, Timeouts & Tool Exceptions)",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 15 },
+      "id": 5,
+      "title": "AI Completion Error Count",
+      "type": "stat",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"docker-container-logs\"} |~ \"error|fail|timeout\" [$__range])) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
           }
         }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 15 },
+      "id": 6,
+      "title": "Failed Tool Execution Rate",
+      "type": "stat",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"docker-container-logs\"} | json | `gen_ai.tool_calls` != \"[]\" |~ \"error|fail\" [$__range])) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "orange" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 15 },
+      "id": 7,
+      "title": "Finish Reason Anomaly Count",
+      "type": "stat",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "sum(count_over_time({job=\"docker-container-logs\"} | json | `gen_ai.response.finish_reasons` != \"stop\" and `gen_ai.response.finish_reasons` != \"\" [$__range])) or vector(0)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "fixed", "fixedColor": "yellow" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 },
+      "id": 400,
+      "title": "Google SRE Golden Signal 4: Saturation (Context Window Limits & Provider Quotas)",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 20 },
+      "id": 8,
+      "title": "Context Window Saturation (Avg tokens per call vs model limit)",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "avg(avg_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.total_tokens` [$__interval]))",
+          "legendFormat": "Avg Tokens per request",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 20 },
+      "id": 9,
+      "title": "Active User Sessions & Tokens usage per Session",
+      "type": "bargauge",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "sum by(container) (sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.total_tokens` [$__range]) + 1)",
+          "legendFormat": "Session ID: {{container}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 26 },
+      "id": 500,
+      "title": "AI Logs & Transaction Trace Auditor",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 27 },
+      "id": 10,
+      "title": "Structured LLM Prompt Trace Log Stream",
+      "type": "logs",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "{job=\"docker-container-logs\"}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "showTime": true,
+        "sortOrder": "Descending"
       }
     }
   ],
   "refresh": "10s",
   "schemaVersion": 39,
   "style": "dark",
-  "tags": ["prometheus", "loki", "ai", "llm"],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-1h",
-    "to": "now"
-  },
+  "tags": ["ai", "llmops", "observability", "loki"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
   "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m"
-    ]
+    "refresh_intervals": [ "5s", "10s", "30s", "1m", "5m" ]
   },
   "timezone": "browser",
-  "title": "AI Observability & LLM Performance",
+  "title": "AI Observability Console",
   "uid": "ai_observability",
   "version": 1
 }

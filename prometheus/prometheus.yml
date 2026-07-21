@@ -23,7 +23,7 @@ scrape_configs:
       - targets: ['cadvisor:8080']
 
   # Placeholder For Backend Application Metrics
-  - job_name: 'backend-service'
+  - job_name: 'backend-app'
     metrics_path: '/metrics'
     scrape_interval: 10s
     static_configs:
