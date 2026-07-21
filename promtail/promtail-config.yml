@@ -76,16 +76,16 @@ scrape_configs:
       # Step 4: Normalization And Consolidation Of Extracted Fields
       - template:
           source: level
-          template: '{{ if .json_level }}{{ .json_level }}{{ else if .json_lvl }}{{ .json_lvl }}{{ else if .regex_level }}{{ .regex_level }}{{ else if .bracket_level }}{{ .bracket_level }}{{ else }}INFO{{ end }}'
+          template: '{{ if .json_level }}{{ .json_level }}{{ else if .json_lvl }}{{ .json_lvl }}{{ else if .regex_level }}{{ .regex_level }}{{ else if .bracket_level }}{{ .bracket_level }}{{ else }}info{{ end }}'
       
       - template:
           source: level
-          template: '{{ ToUpper .level }}'
+          template: '{{ ToLower .level }}'
 
-      # Standardize WARNING To WARN
+      # Standardize warning to warn
       - template:
           source: level
-          template: '{{ if eq .level "WARNING" }}WARN{{ else }}{{ .level }}{{ end }}'
+          template: '{{ if eq .level "warning" }}warn{{ else }}{{ .level }}{{ end }}'
 
       - template:
           source: service
