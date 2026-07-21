@@ -753,9 +753,7 @@
       "id": 8,
       "options": {
         "dedupStrategy": "none",
-        "displayedFields": [
-          "level"
-        ],
+        "displayedFields": [],
         "enableLogDetails": true,
         "prettifyJson": true,
         "prettifyLogMessage": false,

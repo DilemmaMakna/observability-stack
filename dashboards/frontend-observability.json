@@ -612,9 +612,7 @@
       "id": 7,
       "options": {
         "dedupStrategy": "none",
-        "displayedFields": [
-          "level"
-        ],
+        "displayedFields": [],
         "enableLogDetails": true,
         "prettifyJson": true,
         "prettifyLogMessage": false,
