@@ -186,7 +186,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 8 },
       "id": 200,
-      "title": "Layer 1: Frontend User Experience",
+      "title": "Frontend User Experience",
       "type": "row"
     },
     {
@@ -246,7 +246,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
       "id": 300,
-      "title": "Layer 2: Backend API & Server Saturation",
+      "title": "Backend API & Server Saturation",
       "type": "row"
     },
     {
@@ -304,14 +304,60 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 22 },
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 22 },
+      "id": 15,
+      "title": "Container CPU Usage",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"$container\"}[5m])) by (name) * 100",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 22 },
+      "id": 16,
+      "title": "Container Memory Usage",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "sum(container_memory_working_set_bytes{name=~\"$container\"}) by (name)",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "decbytes",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 28 },
       "id": 400,
-      "title": "Layer 3: AI Engine & LLMOps Indicators",
+      "title": "AI Engine & LLMOps Indicators",
       "type": "row"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 23 },
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 29 },
       "id": 9,
       "title": "LLM Tokens Ingestion Trend",
       "type": "timeseries",
@@ -340,7 +386,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 23 },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 29 },
       "id": 10,
       "title": "RAG Retrieval Latency vs Similarity Count",
       "type": "timeseries",
@@ -369,14 +415,14 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 29 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
       "id": 500,
       "title": "Unified Logs Auditor",
       "type": "row"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 30 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 36 },
       "id": 11,
       "title": "Unified Log Stream",
       "type": "logs",

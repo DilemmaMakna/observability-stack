@@ -8,6 +8,12 @@ discovery.relabel "docker_targets" {
   targets = discovery.docker.docker_containers.targets
 
   rule {
+    source_labels = ["__meta_docker_container_label_logging"]
+    regex         = "true"
+    action        = "keep"
+  }
+
+  rule {
     source_labels = ["__meta_docker_container_name"]
     regex         = "/(.*)"
     target_label  = "container"

@@ -3,6 +3,8 @@ services:
   prometheus:
     image: prom/prometheus:${PROMETHEUS_VERSION:-v2.53.0}
     container_name: lemma-prometheus
+    labels:
+      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -33,6 +35,8 @@ services:
   loki:
     image: grafana/loki:${LOKI_VERSION:-3.0.0}
     container_name: lemma-loki
+    labels:
+      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -55,6 +59,8 @@ services:
   alloy:
     image: grafana/alloy:${ALLOY_VERSION:-v1.18.0}
     container_name: lemma-alloy
+    labels:
+      logging: "true"
     user: root
     restart: unless-stopped
     security_opt:
@@ -77,6 +83,8 @@ services:
   node-exporter:
     image: prom/node-exporter:${NODE_EXPORTER_VERSION:-v1.8.2}
     container_name: lemma-node-exporter
+    labels:
+      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -102,6 +110,8 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-v0.49.1}
     container_name: lemma-cadvisor
+    labels:
+      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -126,6 +136,8 @@ services:
   grafana:
     image: grafana/grafana:${GRAFANA_VERSION:-11.1.0}
     container_name: lemma-grafana
+    labels:
+      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -153,6 +165,8 @@ services:
   renderer:
     image: grafana/grafana-image-renderer:latest
     container_name: lemma-renderer
+    labels:
+      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
