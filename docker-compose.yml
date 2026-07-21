@@ -61,7 +61,7 @@ services:
     # Note: loki image is distroless (no shell/curl/wget).
     # Health check via process check since HTTP tools unavailable.
     healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:1C1E'"]
+      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:0C1C'"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -131,7 +131,7 @@ services:
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
     # Note: node-exporter image is distroless (no shell/curl/wget).
     healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:2386'"]
+      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:238C'"]
       interval: 30s
       timeout: 5s
       retries: 3
