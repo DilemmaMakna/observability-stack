@@ -322,7 +322,7 @@
       "collapsed": false,
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 23 },
       "id": 10,
-      "title": "RAG Retrieval Latency vs Similarity count",
+      "title": "RAG Retrieval Latency vs Similarity Count",
       "type": "timeseries",
       "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
@@ -358,7 +358,7 @@
       "collapsed": false,
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 30 },
       "id": 11,
-      "title": "Unified Docker Container log Stream",
+      "title": "Unified Docker Container Log Stream",
       "type": "logs",
       "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [

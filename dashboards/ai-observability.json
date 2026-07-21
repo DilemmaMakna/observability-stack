@@ -257,7 +257,7 @@
       "collapsed": false,
       "gridPos": { "h": 6, "w": 12, "x": 12, "y": 20 },
       "id": 9,
-      "title": "Active User Sessions & Tokens usage per Session",
+      "title": "Active User Sessions & Tokens Usage per Session",
       "type": "bargauge",
       "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
