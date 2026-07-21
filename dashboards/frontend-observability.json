@@ -746,6 +746,6 @@
   "timezone": "browser",
   "title": "Frontend Observability Console",
   "uid": "frontend_observability",
-  "version": 103,
+  "version": 104,
   "weekStart": ""
 }

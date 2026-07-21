@@ -887,6 +887,6 @@
   "timezone": "browser",
   "title": "Backend Observability Console",
   "uid": "backend_observability",
-  "version": 103,
+  "version": 104,
   "weekStart": ""
 }

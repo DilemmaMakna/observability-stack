@@ -28,6 +28,19 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
       - '--web.enable-remote-write-receiver'
+    # Note: prometheus image is distroless (no shell/curl/wget).
+    # Health check via process check since HTTP tools unavailable.
+    healthcheck:
+      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:2382'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 1200M
+          cpus: "1.00"
 
 
   # Section: Logs System (Loki)
@@ -50,6 +63,19 @@ services:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki-data:/loki
     command: -config.file=/etc/loki/loki-config.yml
+    # Note: loki image is distroless (no shell/curl/wget).
+    # Health check via process check since HTTP tools unavailable.
+    healthcheck:
+      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:1C1E'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 1000M
+          cpus: "1.00"
 
 
   # Section: Unified Log Collector (Grafana Alloy)
@@ -75,6 +101,24 @@ services:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
       - alloy-data:/var/lib/alloy/data
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    depends_on:
+      prometheus:
+        condition: service_started
+      loki:
+        condition: service_started
+      tempo:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:12345/-/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 250M
+          cpus: "0.50"
 
 
   # Section: Host Metrics Exporter
@@ -100,6 +144,18 @@ services:
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    # Note: node-exporter image is distroless (no shell/curl/wget).
+    healthcheck:
+      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:2386'"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+          cpus: "0.20"
 
 
   # Section: Container Metrics Exporter
@@ -124,6 +180,17 @@ services:
       - /dev/disk/:/dev/disk:ro
     devices:
       - /dev/kmsg
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 150M
+          cpus: "0.40"
 
 
   # Section: Visualization (Grafana)
@@ -152,6 +219,26 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
       - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL}
       - GF_INSTALL_PLUGINS=grafana-clock-panel,yesoreyeram-infinity-datasource,marcusolsson-dynamictext-panel
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_healthy
+      alloy:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+          cpus: "0.50"
 
   # Section: Image Rendering Service (Grafana Image Renderer)
   renderer:
@@ -170,6 +257,20 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    depends_on:
+      grafana:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+          cpus: "0.50"
 
   # Section: Distributed Tracing System (Tempo)
   tempo:
@@ -189,6 +290,19 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # Note: tempo image is distroless (no shell/curl/wget).
+    # Health check via process check since HTTP tools unavailable.
+    healthcheck:
+      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:0C80'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+          cpus: "0.50"
 
 networks:
   monitor-net:
