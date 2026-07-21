@@ -65,7 +65,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "always",
             "spanNulls": true,
             "stacking": {
               "group": "A",
@@ -119,7 +119,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.99, {service_name=~\"$container\"} | json latency=`attributes[\"gen_ai.latency_seconds\"]` | unwrap latency [$__interval])",
+          "expr": "quantile_over_time(0.99, {service_name=~\"$container\"} | json latency=`attributes[\"gen_ai.latency_seconds\"]` | unwrap latency [$__interval]) by ()",
           "legendFormat": "p99 LLM Latency",
           "refId": "A"
         },
@@ -129,7 +129,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.90, {service_name=~\"$container\"} | json latency=`attributes[\"gen_ai.latency_seconds\"]` | unwrap latency [$__interval])",
+          "expr": "quantile_over_time(0.90, {service_name=~\"$container\"} | json latency=`attributes[\"gen_ai.latency_seconds\"]` | unwrap latency [$__interval]) by ()",
           "legendFormat": "p90 LLM Latency",
           "refId": "B"
         },
@@ -139,7 +139,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.50, {service_name=~\"$container\"} | json latency=`attributes[\"gen_ai.latency_seconds\"]` | unwrap latency [$__interval])",
+          "expr": "quantile_over_time(0.50, {service_name=~\"$container\"} | json latency=`attributes[\"gen_ai.latency_seconds\"]` | unwrap latency [$__interval]) by ()",
           "legendFormat": "p50 LLM Latency (Median)",
           "refId": "C"
         }
@@ -888,7 +888,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"} | json | line_format \"[{{.level | upper}}] {{if .body}}{{.body}}{{else}}{{__line__}}\"",
+          "expr": "{service_name=~\"$container\", level=~\"(?i:$level)\"} | json | line_format \"{{.body}}\"",
           "refId": "A"
         }
       ],
@@ -946,6 +946,7 @@
         },
         "hide": 0,
         "includeAll": true,
+        "allValue": ".*",
         "multi": true,
         "name": "level",
         "options": [
@@ -1003,6 +1004,6 @@
   "timezone": "browser",
   "title": "AI Observability Console",
   "uid": "ai_observability",
-  "version": 103,
+  "version": 104,
   "weekStart": ""
 }

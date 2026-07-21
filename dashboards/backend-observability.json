@@ -773,7 +773,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"} | json | line_format \"[{{.level | upper}}] {{if .body}}{{.body}}{{else}}{{__line__}}\"",
+          "expr": "{service_name=~\"$container\", level=~\"(?i:$level)\"} | json | line_format \"{{.body}}\"",
           "refId": "A"
         }
       ],
@@ -831,6 +831,7 @@
         },
         "hide": 0,
         "includeAll": true,
+        "allValue": ".*",
         "multi": true,
         "name": "level",
         "options": [
