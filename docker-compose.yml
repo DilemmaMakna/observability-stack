@@ -82,12 +82,6 @@ services:
         condition: service_started
       tempo:
         condition: service_started
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "http://localhost:12345/-/healthy"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
 
 
   # Section: Host Metrics Exporter
