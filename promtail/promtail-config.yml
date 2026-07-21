@@ -64,6 +64,15 @@ scrape_configs:
             json_msg: msg
             json_message: message
 
+      # Step 2b: Try Parsing Message Payload As Logfmt (Common For Go, Grafana, Promtail)
+      - logfmt:
+          expressions:
+            logfmt_level: level
+            logfmt_lvl: lvl
+            logfmt_service: service
+            logfmt_msg: msg
+            logfmt_message: message
+
       # Step 3: Regular Expression Fallback For Log Levels (Logfmt Or Plain Text)
       - regex:
           expression: '(?i)level=(?P<regex_level>[a-zA-Z]+)'
@@ -73,7 +82,7 @@ scrape_configs:
       # Step 4: Normalization And Consolidation Of Extracted Fields
       - template:
           source: level
-          template: '{{ if .json_level }}{{ .json_level }}{{ else if .json_lvl }}{{ .json_lvl }}{{ else if .regex_level }}{{ .regex_level }}{{ else if .bracket_level }}{{ .bracket_level }}{{ else }}info{{ end }}'
+          template: '{{ if .json_level }}{{ .json_level }}{{ else if .json_lvl }}{{ .json_lvl }}{{ else if .logfmt_level }}{{ .logfmt_level }}{{ else if .logfmt_lvl }}{{ .logfmt_lvl }}{{ else if .regex_level }}{{ .regex_level }}{{ else if .bracket_level }}{{ .bracket_level }}{{ else }}info{{ end }}'
       
       - template:
           source: level
@@ -86,7 +95,7 @@ scrape_configs:
 
       - template:
           source: service
-          template: '{{ if .json_service }}{{ .json_service }}{{ else }}{{ .container }}{{ end }}'
+          template: '{{ if .json_service }}{{ .json_service }}{{ else if .logfmt_service }}{{ .logfmt_service }}{{ else }}{{ .container }}{{ end }}'
 
       # Step 5: Export Labels Back To Loki
       - labels:

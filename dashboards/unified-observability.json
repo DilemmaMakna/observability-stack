@@ -376,16 +376,41 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 30 },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 30 },
       "id": 11,
-      "title": "Unified Docker Container Log Stream",
+      "title": "Unified Application Log Stream",
       "type": "logs",
       "datasource": { "type": "loki", "uid": "Loki" },
       "targets": [
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"}",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"} | container !~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "showLevel": true,
+        "prettifyJson": true
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 30 },
+      "id": 12,
+      "title": "Unified Infrastructure Log Stream",
+      "type": "logs",
+      "datasource": { "type": "loki", "uid": "Loki" },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "Loki" },
+          "editorMode": "code",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"} | container =~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
           "refId": "A"
         }
       ],
