@@ -232,7 +232,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\"} | json | logfmt | level =~ \"(?i)$level\"",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"}",
           "refId": "A"
         }
       ],

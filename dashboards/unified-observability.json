@@ -385,7 +385,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\"} | json | logfmt | level =~ \"(?i)$level\" | container !~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"} | container !~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
           "refId": "A"
         }
       ],
@@ -410,7 +410,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\"} | json | logfmt | level =~ \"(?i)$level\" | container =~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"} | container =~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
           "refId": "A"
         }
       ],
