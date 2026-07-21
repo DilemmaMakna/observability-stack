@@ -25,7 +25,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "id": 100,
-      "title": "Google SRE Golden Signal 1: Latency (User Experience & Loading)",
+      "title": "Latency (User Experience & Loading)",
       "type": "row"
     },
     {
@@ -62,7 +62,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
       "id": 200,
-      "title": "Google SRE Golden Signal 2: Traffic (User Engagement & Demographics)",
+      "title": "Traffic (User Engagement & Demographics)",
       "type": "row"
     },
     {
@@ -76,7 +76,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(rate({job=\"docker-container-logs\", container=~\"$container\"}[5m]))",
+          "expr": "sum(rate({service_name=~\"$container\"}[5m]))",
           "legendFormat": "Page Request Hits",
           "refId": "A"
         }
@@ -99,8 +99,8 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum by(container) (count_over_time({job=\"docker-container-logs\", container=~\"$container\"}[$__range]))",
-          "legendFormat": "Ingress Target: {{container}}",
+          "expr": "sum by(service_name) (count_over_time({service_name=~\"$container\"}[$__range]))",
+          "legendFormat": "Ingress Target: {{service_name}}",
           "refId": "A"
         }
       ],
@@ -114,7 +114,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
       "id": 300,
-      "title": "Google SRE Golden Signal 3: Errors (Client Faults & Script Exceptions)",
+      "title": "Errors (Client Faults & Script Exceptions)",
       "type": "row"
     },
     {
@@ -181,7 +181,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 },
       "id": 400,
-      "title": "Google SRE Golden Signal 4: Saturation (Client Connections & Page Size)",
+      "title": "Saturation (Client Connections & Page Size)",
       "type": "row"
     },
     {
@@ -232,7 +232,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"}",
+          "expr": "{service_name=~\"$container\", level=~\"$level\"}",
           "refId": "A"
         }
       ],
@@ -259,14 +259,14 @@
       {
         "current": {},
         "datasource": { "type": "loki", "uid": "Loki" },
-        "definition": "label_values(container)",
+        "definition": "label_values(service_name)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "container",
         "options": [],
         "query": {
-          "label": "container",
+          "label": "service_name",
           "refId": "LokiVariableQuery",
           "stream": "",
           "type": 1

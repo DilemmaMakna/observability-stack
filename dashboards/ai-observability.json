@@ -25,7 +25,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "id": 100,
-      "title": "Google SRE Golden Signal 1: Latency (LLM Gen & RAG Phase)",
+      "title": "Latency (LLM Gen & RAG Phase)",
       "type": "row"
     },
     {
@@ -39,21 +39,21 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.99, {job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.latency_seconds` [$__interval])",
+          "expr": "quantile_over_time(0.99, {service_name=~\"$container\"} | json latency=\\`[\"gen_ai.latency_seconds\"]\\` | unwrap latency [$__interval])",
           "legendFormat": "p99 LLM Latency",
           "refId": "A"
         },
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.90, {job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.latency_seconds` [$__interval])",
+          "expr": "quantile_over_time(0.90, {service_name=~\"$container\"} | json latency=\\`[\"gen_ai.latency_seconds\"]\\` | unwrap latency [$__interval])",
           "legendFormat": "p90 LLM Latency",
           "refId": "B"
         },
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "quantile_over_time(0.50, {job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.latency_seconds` [$__interval])",
+          "expr": "quantile_over_time(0.50, {service_name=~\"$container\"} | json latency=\\`[\"gen_ai.latency_seconds\"]\\` | unwrap latency [$__interval])",
           "legendFormat": "p50 LLM Latency (Median)",
           "refId": "C"
         }
@@ -76,7 +76,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `rag_latency_seconds` [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap rag_latency_seconds [$__interval]))",
           "legendFormat": "Avg Retrieval Latency",
           "refId": "A"
         }
@@ -92,7 +92,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
       "id": 200,
-      "title": "Google SRE Golden Signal 2: Traffic (Token Volume & Financial Spend)",
+      "title": "Traffic (Token Volume & Financial Spend)",
       "type": "row"
     },
     {
@@ -106,14 +106,14 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.usage.input_tokens` [$__interval]))",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json input_tokens=\\`[\"gen_ai.usage.input_tokens\"]\\` | unwrap input_tokens [$__interval]))",
           "legendFormat": "Input Tokens",
           "refId": "A"
         },
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.usage.output_tokens` [$__interval]))",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json output_tokens=\\`[\"gen_ai.usage.output_tokens\"]\\` | unwrap output_tokens [$__interval]))",
           "legendFormat": "Output Tokens",
           "refId": "B"
         }
@@ -135,7 +135,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.usage.input_tokens` [$__interval])) * 0.0000015 + sum(sum_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.usage.output_tokens` [$__interval])) * 0.000002",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json input_tokens=\\`[\"gen_ai.usage.input_tokens\"]\\` | unwrap input_tokens [$__interval])) * 0.0000015 + sum(sum_over_time({service_name=~\"$container\"} | json output_tokens=\\`[\"gen_ai.usage.output_tokens\"]\\` | unwrap output_tokens [$__interval])) * 0.000002",
           "legendFormat": "Estimated Spend ($)",
           "refId": "A"
         }
@@ -151,7 +151,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
       "id": 300,
-      "title": "Google SRE Golden Signal 3: Errors (Failures, Timeouts & Tool Exceptions)",
+      "title": "Errors (Failures, Timeouts & Tool Exceptions)",
       "type": "row"
     },
     {
@@ -165,7 +165,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({job=\"docker-container-logs\", container=~\"$container\"} |~ \"error|fail|timeout\" [$__range])) or vector(0)",
+          "expr": "sum(count_over_time({service_name=~\"$container\"} |~ \"error|fail|timeout\" [$__range])) or vector(0)",
           "refId": "A"
         }
       ],
@@ -197,7 +197,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | `gen_ai.tool_calls` != \"[]\" |~ \"error|fail\" [$__range])) or vector(0)",
+          "expr": "sum(count_over_time({service_name=~\"$container\"} | json tool_calls=\\`[\"gen_ai.tool_calls\"]\\` | tool_calls != \"[]\" |~ \"error|fail\" [$__range])) or vector(0)",
           "refId": "A"
         }
       ],
@@ -222,7 +222,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(count_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | `gen_ai.response.finish_reasons` != \"stop\" and `gen_ai.response.finish_reasons` != \"\" [$__range])) or vector(0)",
+          "expr": "sum(count_over_time({service_name=~\"$container\"} | json finish_reasons=\\`[\"gen_ai.response.finish_reasons\"]\\` | finish_reasons != \"stop\" and finish_reasons != \"\" [$__range])) or vector(0)",
           "refId": "A"
         }
       ],
@@ -240,7 +240,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 },
       "id": 400,
-      "title": "Google SRE Golden Signal 4: Saturation (Context Window Limits & Provider Quotas)",
+      "title": "Saturation (Context Window Limits & Provider Quotas)",
       "type": "row"
     },
     {
@@ -254,7 +254,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.usage.total_tokens` [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json total_tokens=\\`[\"gen_ai.usage.total_tokens\"]\\` | unwrap total_tokens [$__interval]))",
           "legendFormat": "Avg Tokens per request",
           "refId": "A"
         }
@@ -276,8 +276,8 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum by(container) (sum_over_time({job=\"docker-container-logs\", container=~\"$container\"} | json | unwrap `gen_ai.usage.total_tokens` [$__range]) + 1)",
-          "legendFormat": "Session ID: {{container}}",
+          "expr": "sum by(service_name) (sum_over_time({service_name=~\"$container\"} | json total_tokens=\\`[\"gen_ai.usage.total_tokens\"]\\` | unwrap total_tokens [$__range]) + 1)",
+          "legendFormat": "Session ID: {{service_name}}",
           "refId": "A"
         }
       ],
@@ -305,7 +305,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"}",
+          "expr": "{service_name=~\"$container\", level=~\"$level\"}",
           "refId": "A"
         }
       ],
@@ -332,14 +332,14 @@
       {
         "current": {},
         "datasource": { "type": "loki", "uid": "Loki" },
-        "definition": "label_values(container)",
+        "definition": "label_values(service_name)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "container",
         "options": [],
         "query": {
-          "label": "container",
+          "label": "service_name",
           "refId": "LokiVariableQuery",
           "stream": "",
           "type": 1

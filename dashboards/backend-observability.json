@@ -25,7 +25,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
       "id": 100,
-      "title": "Google SRE Golden Signal 1: Latency",
+      "title": "Latency",
       "type": "row"
     },
     {
@@ -69,7 +69,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
       "id": 200,
-      "title": "Google SRE Golden Signal 2: Traffic",
+      "title": "Traffic",
       "type": "row"
     },
     {
@@ -99,7 +99,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 14 },
       "id": 300,
-      "title": "Google SRE Golden Signal 3: Errors",
+      "title": "Errors",
       "type": "row"
     },
     {
@@ -166,7 +166,7 @@
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 },
       "id": 400,
-      "title": "Google SRE Golden Signal 4: Saturation (Resources)",
+      "title": "Saturation (Resources)",
       "type": "row"
     },
     {

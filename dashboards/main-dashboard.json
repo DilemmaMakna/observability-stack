@@ -91,7 +91,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.input_tokens` [$__range])) * 0.0000015 + sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.output_tokens` [$__range])) * 0.000002",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json input_tokens=\\`[\"gen_ai.usage.input_tokens\"]\\`, output_tokens=\\`[\"gen_ai.usage.output_tokens\"]\\` | unwrap input_tokens [$__range])) * 0.0000015 + sum(sum_over_time({service_name=~\"$container\"} | json input_tokens=\\`[\"gen_ai.usage.input_tokens\"]\\`, output_tokens=\\`[\"gen_ai.usage.output_tokens\"]\\` | unwrap output_tokens [$__range])) * 0.000002",
           "refId": "A"
         }
       ],
@@ -125,7 +125,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.latency_seconds` [$__range]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json latency=\\`[\"gen_ai.latency_seconds\"]\\` | unwrap latency [$__range]))",
           "refId": "A"
         }
       ],
@@ -306,7 +306,7 @@
       "collapsed": false,
       "gridPos": { "h": 6, "w": 8, "x": 16, "y": 16 },
       "id": 17,
-      "title": "Host Node Saturation Speedometer",
+      "title": "Host Node Saturation",
       "type": "gauge",
       "datasource": { "type": "prometheus", "uid": "Prometheus" },
       "targets": [
@@ -463,14 +463,14 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.input_tokens` [$__interval]))",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json input_tokens=\\`[\"gen_ai.usage.input_tokens\"]\\` | unwrap input_tokens [$__interval]))",
           "legendFormat": "Input Tokens (Prompt)",
           "refId": "A"
         },
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.output_tokens` [$__interval]))",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json output_tokens=\\`[\"gen_ai.usage.output_tokens\"]\\` | unwrap output_tokens [$__interval]))",
           "legendFormat": "Output Tokens (Completion)",
           "refId": "B"
         }
@@ -492,14 +492,14 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap `rag_latency_seconds` [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap rag_latency_seconds [$__interval]))",
           "legendFormat": "RAG Time (sec)",
           "refId": "A"
         },
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap `rag_docs_count` [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap rag_docs_count [$__interval]))",
           "legendFormat": "Documents Retrieved",
           "refId": "B"
         }
