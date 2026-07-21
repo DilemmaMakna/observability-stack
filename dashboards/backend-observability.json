@@ -771,7 +771,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "{service_name=~\"$container\", level=~\"(?i:$level)\"} | json | line_format \"{{.body}}\"",
+          "expr": "{service_name=~\"$container\", level=~\"(?i:$level)\"} | json | line_format \"[{{.level}}] {{.body}}\"",
           "refId": "A"
         }
       ],
@@ -888,6 +888,6 @@
   "timezone": "browser",
   "title": "Backend Observability Console",
   "uid": "backend_observability",
-  "version": 106,
+  "version": 107,
   "weekStart": ""
 }
