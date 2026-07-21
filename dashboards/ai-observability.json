@@ -316,7 +316,10 @@
         "showTime": true,
         "sortOrder": "Descending",
         "showLevel": true,
-        "prettifyJson": true
+        "prettifyJson": true,
+        "displayedFields": [
+          "level"
+        ]
       }
     }
   ],
