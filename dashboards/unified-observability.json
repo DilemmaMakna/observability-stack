@@ -77,7 +77,7 @@
       },
       "options": {
         "graphMode": "area",
-        "textMode": "value_and_name"
+        "textMode": "value"
       }
     },
     {
@@ -111,7 +111,7 @@
       },
       "options": {
         "graphMode": "area",
-        "textMode": "value_and_name"
+        "textMode": "value"
       }
     },
     {
@@ -145,7 +145,7 @@
       },
       "options": {
         "graphMode": "area",
-        "textMode": "value_and_name"
+        "textMode": "value"
       }
     },
     {
@@ -179,7 +179,7 @@
       },
       "options": {
         "graphMode": "area",
-        "textMode": "value_and_name"
+        "textMode": "value"
       }
     },
     {
@@ -385,7 +385,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"} | container !~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\"} | json | logfmt | level =~ \"(?i)$level\" | container !~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
           "refId": "A"
         }
       ],
@@ -410,7 +410,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"} | container =~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\"} | json | logfmt | level =~ \"(?i)$level\" | container =~ \".*promtail.*|.*cadvisor.*|.*node-exporter.*|.*renderer.*\"",
           "refId": "A"
         }
       ],
@@ -453,25 +453,52 @@
         "type": "query"
       },
       {
-        "current": {},
-        "datasource": { "type": "loki", "uid": "Loki" },
-        "definition": "label_values(level)",
+        "current": {
+          "selected": true,
+          "value": [
+            "$__all"
+          ]
+        },
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "level",
-        "options": [],
-        "query": {
-          "label": "level",
-          "refId": "LokiVariableQuery",
-          "stream": "",
-          "type": 1
-        },
-        "refresh": 1,
-        "regex": "",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "info",
+            "value": "info"
+          },
+          {
+            "selected": false,
+            "text": "warn",
+            "value": "warn"
+          },
+          {
+            "selected": false,
+            "text": "error",
+            "value": "error"
+          },
+          {
+            "selected": false,
+            "text": "debug",
+            "value": "debug"
+          },
+          {
+            "selected": false,
+            "text": "critical",
+            "value": "critical"
+          }
+        ],
+        "query": "info,warn,error,debug,critical",
+        "queryValue": "",
         "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
+        "type": "custom"
       }
     ]
   },
