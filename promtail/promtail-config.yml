@@ -66,7 +66,7 @@ scrape_configs:
 
       # Step 2b: Try Parsing Message Payload As Logfmt (Common For Go, Grafana, Promtail)
       - logfmt:
-          expressions:
+          mapping:
             logfmt_level: level
             logfmt_lvl: lvl
             logfmt_service: service
