@@ -41,7 +41,9 @@
         "mode": "24hr",
         "bgColor": "rgba(0,0,0,0)",
         "clockType": "digital",
-        "timezone": "UTC"
+        "timezone": "UTC",
+        "fontSize": "48px",
+        "showSeconds": true
       }
     },
     {
@@ -70,6 +72,10 @@
         "defaults": {
           "color": { "mode": "fixed", "fixedColor": "light-blue" }
         }
+      },
+      "options": {
+        "graphMode": "area",
+        "textMode": "value_and_name"
       }
     },
     {
@@ -100,6 +106,10 @@
             ]
           }
         }
+      },
+      "options": {
+        "graphMode": "area",
+        "textMode": "value_and_name"
       }
     },
     {
@@ -130,6 +140,10 @@
             ]
           }
         }
+      },
+      "options": {
+        "graphMode": "area",
+        "textMode": "value_and_name"
       }
     },
     {
@@ -160,6 +174,10 @@
             ]
           }
         }
+      },
+      "options": {
+        "graphMode": "area",
+        "textMode": "value_and_name"
       }
     },
     {
@@ -365,7 +383,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\"}",
+          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"}",
           "refId": "A"
         }
       ],
@@ -374,7 +392,9 @@
         "wrapLogMessage": true,
         "enableLogDetails": true,
         "showTime": true,
-        "sortOrder": "Descending"
+        "sortOrder": "Descending",
+        "showLevel": true,
+        "prettifyJson": true
       }
     }
   ],
@@ -382,7 +402,52 @@
   "schemaVersion": 39,
   "style": "dark",
   "tags": ["unified", "observability", "loki", "prometheus"],
-  "templating": { "list": [] },
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": { "type": "loki", "uid": "Loki" },
+        "definition": "label_values(container)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "container",
+        "options": [],
+        "query": {
+          "label": "container",
+          "refId": "LokiVariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "loki", "uid": "Loki" },
+        "definition": "label_values(level)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "level",
+        "options": [],
+        "query": {
+          "label": "level",
+          "refId": "LokiVariableQuery",
+          "stream": "",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
+  },
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {
     "refresh_intervals": [ "5s", "10s", "30s", "1m", "5m" ]
