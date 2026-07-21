@@ -802,6 +802,7 @@
         "definition": "label_values(service_name)",
         "hide": 0,
         "includeAll": true,
+        "allValue": ".+",
         "multi": true,
         "name": "container",
         "options": [],
@@ -829,7 +830,7 @@
         },
         "hide": 0,
         "includeAll": true,
-        "allValue": ".*",
+        "allValue": ".+",
         "multi": true,
         "name": "level",
         "options": [
