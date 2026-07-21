@@ -35,7 +35,10 @@ loki.source.docker "docker_logs" {
 loki.process "log_pipeline" {
   forward_to = [loki.write.loki_endpoint.receiver]
 
-  // Stage 1: Try parsing message payload as JSON
+  // Stage 1: Parse the Docker JSON wrapper to extract the raw log payload
+  stage.docker {}
+
+  // Stage 2: Try parsing message payload as JSON
   stage.json {
     expressions = {
       json_level   = "level",
@@ -46,7 +49,7 @@ loki.process "log_pipeline" {
     }
   }
 
-  // Stage 2: Try parsing message payload as Logfmt
+  // Stage 3: Try parsing message payload as Logfmt
   stage.logfmt {
     mapping = {
       logfmt_level   = "level",
@@ -57,39 +60,45 @@ loki.process "log_pipeline" {
     }
   }
 
-  // Stage 3: Match level at start of line
+  // Stage 4: Regex fallback for log level in key-value form
   stage.regex {
-    expression = "^(info|warn|error|debug|critical|panic|fatal|info|warn|err|dbug|crit)[^a-zA-Z0-9]"
+    expression = "(?i)level=(?P<regex_level>[a-zA-Z]+)"
   }
 
-  // Stage 4: Match bracket level [INFO]
+  // Stage 5: Regex fallback for bracket level format
   stage.regex {
-    expression = "\\[(INFO|WARN|ERROR|DEBUG|CRITICAL|PANIC|FATAL|info|warn|error|debug|critical)\\]"
+    expression = "(?i)\\[?(?P<bracket_level>INFO|WARN|ERROR|DEBUG|FATAL|CRITICAL|WARNING)\\]?"
   }
 
-  // Stage 5: Select the first successfully parsed log level, default to info
+  // Stage 6: Select the first successfully parsed log level, default to info
   stage.template {
     source   = "level"
     template = "{{ if .json_level }}{{ .json_level }}{{ else if .json_lvl }}{{ .json_lvl }}{{ else if .logfmt_level }}{{ .logfmt_level }}{{ else if .logfmt_lvl }}{{ .logfmt_lvl }}{{ else if .regex_level }}{{ .regex_level }}{{ else if .bracket_level }}{{ .bracket_level }}{{ else }}info{{ end }}"
   }
 
-  // Stage 6: Normalize level to lowercase
+  // Stage 7: Normalize level to lowercase
   stage.template {
     source   = "level"
     template = "{{ .level | ToLower }}"
   }
 
-  // Stage 7: Standardize warning and err to warn and error
+  // Stage 8: Standardize warning and err to warn and error
   stage.template {
     source   = "level"
     template = "{{ if eq .level \"warning\" }}warn{{ else if eq .level \"err\" }}error{{ else }}{{ .level }}{{ end }}"
   }
 
-  // Stage 8: Expose level and service as Loki labels
+  // Stage 9: Select service name, default to container label if not in payload
+  stage.template {
+    source   = "service"
+    template = "{{ if .json_service }}{{ .json_service }}{{ else if .logfmt_service }}{{ .logfmt_service }}{{ else }}{{ .container }}{{ end }}"
+  }
+
+  // Stage 10: Expose level and service as Loki labels
   stage.labels {
     values = {
       level   = "level",
-      service = "json_service",
+      service = "service",
     }
   }
 }
