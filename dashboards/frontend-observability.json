@@ -612,7 +612,7 @@
       "id": 7,
       "options": {
         "dedupStrategy": "none",
-        "displayedFields": [],
+        "displayedFields": ["level"],
         "enableLogDetails": true,
         "prettifyJson": true,
         "prettifyLogMessage": false,
@@ -747,6 +747,6 @@
   "timezone": "browser",
   "title": "Frontend Observability Console",
   "uid": "frontend_observability",
-  "version": 104,
+  "version": 106,
   "weekStart": ""
 }
