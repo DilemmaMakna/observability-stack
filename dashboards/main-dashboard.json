@@ -1548,7 +1548,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json rag_latency=`attributes.rag_latency_seconds` | unwrap rag_latency [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json rag_latency=`attributes[\"rag_latency_seconds\"]` | unwrap rag_latency [$__interval]))",
           "legendFormat": "RAG Time (sec)",
           "refId": "A"
         },
@@ -1558,7 +1558,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json rag_docs=`attributes.rag_docs_count` | unwrap rag_docs [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json rag_docs=`attributes[\"rag_docs_count\"]` | unwrap rag_docs [$__interval]))",
           "legendFormat": "Documents Retrieved",
           "refId": "B"
         }
@@ -1600,7 +1600,7 @@
         "prettifyJson": true,
         "prettifyLogMessage": false,
         "showCommonLabels": false,
-        "showLabels": true,
+        "showLabels": false,
         "showLevel": true,
         "showTime": true,
         "sortOrder": "Descending",
@@ -1728,7 +1728,7 @@
   "timezone": "browser",
   "title": "Main Dashboard",
   "uid": "main_dashboard",
-  "version": 100,
+  "version": 101,
   "weekStart": ""
 }
 
