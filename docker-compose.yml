@@ -55,6 +55,7 @@ services:
   promtail:
     image: grafana/promtail:${PROMTAIL_VERSION}
     container_name: lemma-promtail
+    user: root
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
