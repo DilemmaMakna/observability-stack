@@ -149,6 +149,25 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL}
+
+  # Section: Image Rendering Service (Grafana Image Renderer)
+  renderer:
+    image: grafana/grafana-image-renderer:latest
+    container_name: lemma-renderer
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    environment:
+      - HTTP_HOST=0.0.0.0
+      - HTTP_PORT=8081
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   monitor-net:
