@@ -232,7 +232,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{service_name=~\"$container\", level=~\"$level\"}",
+          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"}",
           "refId": "A"
         }
       ],
@@ -334,5 +334,5 @@
   "timezone": "browser",
   "title": "Frontend Observability Console",
   "uid": "frontend_observability",
-  "version": 1
+  "version": 100
 }

@@ -270,7 +270,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"}",
+          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"}",
           "refId": "A"
         }
       ],
@@ -297,14 +297,14 @@
       {
         "current": {},
         "datasource": { "type": "loki", "uid": "Loki" },
-        "definition": "label_values(container)",
+        "definition": "label_values(service_name)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "container",
         "options": [],
         "query": {
-          "label": "container",
+          "label": "service_name",
           "refId": "LokiVariableQuery",
           "stream": "",
           "type": 1
@@ -372,5 +372,5 @@
   "timezone": "browser",
   "title": "Backend Observability Console",
   "uid": "backend_observability",
-  "version": 1
+  "version": 100
 }
