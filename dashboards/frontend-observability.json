@@ -128,7 +128,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "(sum(rate(http_requests_total{status=~\"4..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100) or vector(0)",
+          "expr": "(sum(rate(http_requests_total{status_code=~\"4..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100) or vector(0)",
           "refId": "A"
         }
       ],
@@ -162,7 +162,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum(http_requests_total{status=~\"4..\"}) or vector(0)",
+          "expr": "sum(http_requests_total{status_code=~\"4..\"}) or vector(0)",
           "legendFormat": "Client Errors",
           "refId": "A"
         }

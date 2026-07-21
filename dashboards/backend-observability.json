@@ -83,8 +83,8 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum(rate(http_requests_total{job=\"backend-app\"}[5m])) by (status)",
-          "legendFormat": "HTTP status {{status}}",
+          "expr": "sum(rate(http_requests_total{job=\"backend-app\"}[5m])) by (status_code)",
+          "legendFormat": "HTTP status {{status_code}}",
           "refId": "A"
         }
       ],
@@ -113,7 +113,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "(sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100) or vector(0)",
+          "expr": "(sum(rate(http_requests_total{status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100) or vector(0)",
           "refId": "A"
         }
       ],
@@ -147,7 +147,7 @@
         {
           "datasource": { "type": "prometheus", "uid": "Prometheus" },
           "editorMode": "code",
-          "expr": "sum(http_requests_total{status=~\"5..\"}) or vector(0)",
+          "expr": "sum(http_requests_total{status_code=~\"5..\"}) or vector(0)",
           "legendFormat": "Failed Requests",
           "refId": "A"
         }
