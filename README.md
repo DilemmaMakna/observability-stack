@@ -3,22 +3,24 @@
 [![Grafana](https://img.shields.io/badge/Grafana-v11.1.0-orange?logo=grafana)](https://grafana.com)
 [![Prometheus](https://img.shields.io/badge/Prometheus-v2.53.0-red?logo=prometheus)](https://prometheus.io)
 [![Loki](https://img.shields.io/badge/Loki-v3.0.0-blue?logo=grafana)](https://grafana.com/oss/loki/)
+[![Alloy](https://img.shields.io/badge/Alloy-v1.18.0-blue?logo=grafana)](https://grafana.com/oss/alloy/)
+[![Tempo](https://img.shields.io/badge/Tempo-v2.5.0-blue?logo=grafana)](https://grafana.com/oss/tempo/)
 [![Docker](https://img.shields.io/badge/Docker-Stack-blue?logo=docker)](https://www.docker.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](https://opensource.org/licenses/Apache-2.0)
 
-This repository provides an enterprise grade, resource efficient observability stack designed for production environments. It implements full monitoring of the four golden signals (latency, traffic, errors, and saturation) and establishes log ingestion standards for containerized applications and AI services.
+This repository provides an enterprise grade, resource efficient observability stack designed for production environments. It implements full monitoring of the four golden signals (latency, traffic, errors, and saturation) and establishes OpenTelemetry OTLP ingestion standards for application logs, metrics, and distributed traces.
 
 ## Architecture
 
 The stack is composed of the following core systems:
 
-1. Grafana: Visualizes metrics and logs through centralized dashboards.
+1. Grafana: Visualizes metrics, logs, and traces through centralized dashboards.
 2. Prometheus: Collects time series metrics from hosts and containers.
 3. Loki: Provides log aggregation using TSDB indexing and local filesystem storage.
-4. Promtail: Processes, labels, and routes Docker and host system logs to Loki.
-5. Node Exporter: Exports host level performance statistics (CPU, memory, disk, network).
-6. cAdvisor: Gathers container level metrics and resource utilization details.
-7. AI Application Service: A FastAPI implementation providing structured JSON log outputs for RAG and tool calls.
+4. Grafana Alloy: Exposes OTLP HTTP and gRPC endpoints VM-wide to receive application logs, metrics, and traces.
+5. Grafana Tempo: Aggregates and stores distributed traces from microservices and LLM applications.
+6. Node Exporter: Exports host level performance statistics (CPU, memory, disk, network).
+7. cAdvisor: Gathers container level metrics and resource utilization details.
 
 ## Directory Structure
 
@@ -26,13 +28,13 @@ All configurations are modular and decoupled:
 
 ```text
 observability/
-  app: Simulated AI application service
+  alloy: Grafana Alloy collector pipeline configuration
   backup: Backup and restore utilities
   dashboards: Preconfigured Grafana dashboards
   grafana: Configuration and provisioning rules
   loki: Log aggregation database settings
   prometheus: Metric scraping and alert rules
-  promtail: Log collection pipeline configuration
+  tempo: Grafana Tempo tracing backend configuration
 ```
 
 ## Deployment
@@ -54,26 +56,18 @@ Open `.env` to configure version tags, port numbers, and database retention poli
 
 ### Step 2: Launch Stack
 
-Build the local AI service and deploy the stack in detached mode:
+Deploy the stack in detached mode:
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
 
 ### Step 3: Access Ports
 
 1. Grafana: `http://localhost:3030` (Default credentials: admin / your password)
-2. AI Service: `http://localhost:8000/docs` (Interactive API documentation)
-
-Generate sample logs and metrics by executing a request to the chat endpoint:
-
-```bash
-curl -X POST "http://localhost:8000/api/chat" \
-     -H "Content-Type: application/json" \
-     -d '{"prompt": "Tell me about prometheus and system status", "model": "gpt-4o"}'
-```
-
-The system automatically provisions the custom metrics, logs, and AI performance dashboards.
+2. Grafana Alloy UI: `http://localhost:12345` (Collector health and pipeline graph status)
+3. OTLP gRPC Endpoint: Port `4317` (Used by applications to send traces, metrics, and logs)
+4. OTLP HTTP Endpoint: Port `4318` (Alternative OTLP HTTP push endpoint)
 
 ### Deployment on Dokploy
 
@@ -81,41 +75,29 @@ This stack is production ready for Dokploy deployment using Traefik:
 
 1. Create a Docker Compose application in your Dokploy panel.
 2. Connect your Git repository.
-3. Configure domains for your services using the Dokploy UI. Map your Grafana domain to the `grafana` service on container port `3000`. Map your API domain to the `ai-service` service on container port `8000`.
+3. Configure domains for your services using the Dokploy UI. Map your Grafana domain to the `grafana` service on container port `3000`. Map your OTLP endpoints to `alloy` on ports `4317` and `4318`.
 4. Deploy the stack. Dokploy handles the Traefik routing, TLS certificate generation, and network isolation automatically.
 
-## Log Categorization and Ingestion
+## Log and Trace Correlation
 
-The Promtail pipeline parses logs to extract metadata for Loki:
+The Loki pipeline integrates with Tempo through derived fields to automatically link logs to traces. 
 
-1. JSON Parsing: Automated parsing for structured application logs to extract severity, service, and message attributes.
-2. Text Fallback: Regular expressions parse unstructured text logs containing bracketed levels or key value strings.
-3. Normalization: Log levels are standardized to uppercase (INFO, WARN, ERROR, DEBUG) to ensure consistent querying.
-4. Source Attribution: Loki indexes container metadata, including the container name, image version, and stream.
+1. Regex Extraction: The Loki data source uses the expression `trace_id[=:\s"]+(\w+)` to parse trace identifiers from logs.
+2. Direct Navigation: Clicking the View Trace button next to a log line opens the Tempo trace timeline split-screen instantly.
+3. Trace-to-Logs: When viewing a trace, you can search corresponding logs for that specific trace or span with one click.
 
-## AI Application Observability
+## Running the SRE AI Test Application
 
-High cardinality metadata fields like token counts and prompt logs are kept in the log payload rather than being indexed as labels. This preserves Loki database performance. The log fields follow the OpenTelemetry GenAI Semantic Conventions. These metrics are queried via LogQL.
+An SRE test application is provided in `test_ai.py` to verify the end-to-end flow of logs, metrics, and traces. To run it locally on the host:
 
-### LogQL Examples
-
-To sum total tokens used:
-
-```logql
-sum(sum_over_time({container="lemma-ai-service"} | json | unwrap `gen_ai.usage.total_tokens` [$__interval]))
+```bash
+uv run --with python-dotenv --with openai --with opentelemetry-api --with opentelemetry-sdk --with opentelemetry-exporter-otlp --with opentelemetry-instrumentation-openai python test_ai.py
 ```
 
-To filter logs containing tool executions:
-
-```logql
-{container="lemma-ai-service"} | json | `gen_ai.tool_calls` != "[]"
-```
-
-To isolate logs for a specific request trace:
-
-```logql
-{container="lemma-ai-service"} | json | trace_id = "target_uuid"
-```
+This script performs the following actions:
+1. Connects to OpenAI using your API key from the local `.env`.
+2. Generates traces and logs structured under the OpenTelemetry GenAI Semantic Conventions.
+3. Flushes the telemetry directly to Alloy, which routes them to Loki and Tempo.
 
 ## Resource Allocation and Limits
 
@@ -124,10 +106,10 @@ To support deployment on small hosts, CPU and memory boundaries are set on every
 1. Prometheus: Limited to 1200MB memory, 1.00 CPU. Retention set to 14 days or 10GB.
 2. Loki: Limited to 1000MB memory, 1.00 CPU. Retention set to 7 days.
 3. Grafana: Limited to 400MB memory, 0.50 CPU.
-4. Promtail: Limited to 150MB memory, 0.40 CPU.
-5. cAdvisor: Limited to 150MB memory, 0.40 CPU.
-6. Node Exporter: Limited to 50MB memory, 0.20 CPU.
-7. AI Service: Limited to 800MB memory, 1.00 CPU.
+4. Grafana Alloy: Limited to 250MB memory, 0.50 CPU.
+5. Grafana Tempo: Limited to 400MB memory, 0.50 CPU.
+6. cAdvisor: Limited to 150MB memory, 0.40 CPU.
+7. Node Exporter: Limited to 50MB memory, 0.20 CPU.
 
 The total memory reservation is optimized for a 4GB RAM instance, leaving a safe buffer.
 
@@ -164,6 +146,7 @@ To restore the stack:
    docker volume create lemma_prometheus_data
    docker volume create lemma_loki_data
    docker volume create lemma_grafana_data
+   docker volume create lemma_tempo_data
    ```
 
 3. Unpack database contents back into the volumes:
@@ -171,6 +154,7 @@ To restore the stack:
    docker run --rm -v lemma_prometheus_data:/volume -v /home/ubuntu/lemma/observability-stack/backup/archive:/backup alpine sh -c "tar -xzf /backup/lemma_prometheus_data_timestamp.tar.gz -C /volume"
    docker run --rm -v lemma_loki_data:/volume -v /home/ubuntu/lemma/observability-stack/backup/archive:/backup alpine sh -c "tar -xzf /backup/lemma_loki_data_timestamp.tar.gz -C /volume"
    docker run --rm -v lemma_grafana_data:/volume -v /home/ubuntu/lemma/observability-stack/backup/archive:/backup alpine sh -c "tar -xzf /backup/lemma_grafana_data_timestamp.tar.gz -C /volume"
+   docker run --rm -v lemma_tempo_data:/volume -v /home/ubuntu/lemma/observability-stack/backup/archive:/backup alpine sh -c "tar -xzf /backup/lemma_tempo_data_timestamp.tar.gz -C /volume"
    ```
 
 4. Bring the stack up:

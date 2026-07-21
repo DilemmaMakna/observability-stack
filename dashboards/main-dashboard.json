@@ -91,7 +91,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.input_tokens` [$__range])) * 0.0000015 + sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.output_tokens` [$__range])) * 0.000002",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.input_tokens` [$__range])) * 0.0000015 + sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.output_tokens` [$__range])) * 0.000002",
           "refId": "A"
         }
       ],
@@ -125,7 +125,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.latency_seconds` [$__range]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.latency_seconds` [$__range]))",
           "refId": "A"
         }
       ],
@@ -251,7 +251,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 16 },
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 16 },
       "id": 7,
       "title": "HTTP Ingress Throughput by Response Status",
       "type": "timeseries",
@@ -274,7 +274,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 16 },
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 16 },
       "id": 8,
       "title": "Host Node Hardware Saturation (CPU/RAM)",
       "type": "timeseries",
@@ -300,6 +300,50 @@
           "unit": "percent",
           "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
         }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 16 },
+      "id": 17,
+      "title": "Host Node Saturation Speedometer",
+      "type": "gauge",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) * 100)",
+          "legendFormat": "CPU",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100",
+          "legendFormat": "Memory",
+          "refId": "B"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "red", "value": 85 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "text": {}
       }
     },
     {
@@ -351,13 +395,66 @@
     {
       "collapsed": false,
       "gridPos": { "h": 1, "w": 24, "x": 0, "y": 28 },
+      "id": 600,
+      "title": "Host Storage & Disk Saturation",
+      "type": "row"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 5, "w": 12, "x": 0, "y": 29 },
+      "id": 18,
+      "title": "Host Disk I/O Saturation",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "rate(node_disk_io_time_seconds_total{device=~\"sd.*|vd.*|nvme.*\"}[5m]) * 100",
+          "legendFormat": "{{device}} Utilization (%)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 5, "w": 12, "x": 12, "y": 29 },
+      "id": 19,
+      "title": "Host Disk Space Usage",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "Prometheus" },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "Prometheus" },
+          "editorMode": "code",
+          "expr": "(node_filesystem_size_bytes{mountpoint=\"/\"} - node_filesystem_free_bytes{mountpoint=\"/\"}) / node_filesystem_size_bytes{mountpoint=\"/\"} * 100",
+          "legendFormat": "Disk / Usage (%)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
       "id": 400,
       "title": "AI Engine & LLMOps Indicators",
       "type": "row"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 29 },
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 36 },
       "id": 9,
       "title": "LLM Tokens Ingestion Trend",
       "type": "timeseries",
@@ -366,14 +463,14 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.input_tokens` [$__interval]))",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.input_tokens` [$__interval]))",
           "legendFormat": "Input Tokens (Prompt)",
           "refId": "A"
         },
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "sum(sum_over_time({job=\"docker-container-logs\"} | json | unwrap `gen_ai.usage.output_tokens` [$__interval]))",
+          "expr": "sum(sum_over_time({service_name=~\"$container\"} | json | unwrap `gen_ai.usage.output_tokens` [$__interval]))",
           "legendFormat": "Output Tokens (Completion)",
           "refId": "B"
         }
@@ -386,7 +483,7 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 29 },
+      "gridPos": { "h": 6, "w": 12, "x": 12, "y": 36 },
       "id": 10,
       "title": "RAG Retrieval Latency vs Similarity Count",
       "type": "timeseries",
@@ -395,14 +492,14 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({job=\"docker-container-logs\"} | json | unwrap `rag_latency_seconds` [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap `rag_latency_seconds` [$__interval]))",
           "legendFormat": "RAG Time (sec)",
           "refId": "A"
         },
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "avg(avg_over_time({job=\"docker-container-logs\"} | json | unwrap `rag_docs_count` [$__interval]))",
+          "expr": "avg(avg_over_time({service_name=~\"$container\"} | json | unwrap `rag_docs_count` [$__interval]))",
           "legendFormat": "Documents Retrieved",
           "refId": "B"
         }
@@ -415,14 +512,14 @@
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 35 },
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 42 },
       "id": 500,
       "title": "Unified Logs Auditor",
       "type": "row"
     },
     {
       "collapsed": false,
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 36 },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 43 },
       "id": 11,
       "title": "Unified Log Stream",
       "type": "logs",
@@ -431,7 +528,7 @@
         {
           "datasource": { "type": "loki", "uid": "Loki" },
           "editorMode": "code",
-          "expr": "{job=\"docker-container-logs\", container=~\"$container\", level=~\"$level\"}",
+          "expr": "{service_name=~\"$container\", level=~\"$level\"} or {service=~\"$container\", level=~\"$level\"}",
           "refId": "A"
         }
       ],
@@ -458,14 +555,14 @@
       {
         "current": {},
         "datasource": { "type": "loki", "uid": "Loki" },
-        "definition": "label_values(container)",
+        "definition": "label_values(service_name)",
         "hide": 0,
         "includeAll": true,
         "multi": true,
         "name": "container",
         "options": [],
         "query": {
-          "label": "container",
+          "label": "service_name",
           "refId": "LokiVariableQuery",
           "stream": "",
           "type": 1
@@ -531,7 +628,7 @@
     "refresh_intervals": [ "5s", "10s", "30s", "1m", "5m" ]
   },
   "timezone": "browser",
-  "title": "Unified Observability Console",
-  "uid": "unified_observability",
+  "title": "Main Dashboard",
+  "uid": "main_dashboard",
   "version": 1
 }

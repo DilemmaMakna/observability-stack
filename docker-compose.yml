@@ -171,6 +171,25 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # Section: Distributed Tracing System (Tempo)
+  tempo:
+    image: grafana/tempo:${TEMPO_VERSION:-2.5.0}
+    container_name: lemma-tempo
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - monitor-net
+    command: [ "-config.file=/etc/tempo/tempo.yml" ]
+    volumes:
+      - ./tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo-data:/var/tempo
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   monitor-net:
     name: lemma_observability_network
@@ -185,3 +204,5 @@ volumes:
     name: lemma_alloy_data
   grafana-data:
     name: lemma_grafana_data
+  tempo-data:
+    name: lemma_tempo_data

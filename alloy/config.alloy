@@ -1,4 +1,4 @@
-// 1. Receive OTLP data (Metrics and Logs) over gRPC (4317) and HTTP (4318)
+// 1. Receive OTLP data (Metrics, Logs, Traces) over gRPC (4317) and HTTP (4318)
 otelcol.receiver.otlp "default" {
   grpc {
     endpoint = "0.0.0.0:4317"
@@ -8,8 +8,9 @@ otelcol.receiver.otlp "default" {
   }
 
   output {
-    metrics = [otelcol.processor.batch.default.metrics]
-    logs    = [otelcol.processor.batch.default.logs]
+    metrics = [otelcol.processor.batch.default.input]
+    logs    = [otelcol.processor.batch.default.input]
+    traces  = [otelcol.processor.batch.default.input]
   }
 }
 
@@ -18,6 +19,7 @@ otelcol.processor.batch "default" {
   output {
     metrics = [otelcol.exporter.prometheus.default.input]
     logs    = [otelcol.exporter.loki.default.input]
+    traces  = [otelcol.exporter.otlp.tempo.input]
   }
 }
 
@@ -42,5 +44,15 @@ otelcol.exporter.loki "default" {
 loki.write "local_loki" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// 7. Convert OTLP traces and send to Tempo distributed tracing backend
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls {
+      insecure = true
+    }
   }
 }
