@@ -1613,7 +1613,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"}",
+          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"} | json | line_format \"[{{.level | upper}}] {{if .body}}{{.body}}{{else}}{{__line__}}{{end}}\"",
           "refId": "A"
         }
       ],
@@ -1728,7 +1728,7 @@
   "timezone": "browser",
   "title": "Main Dashboard",
   "uid": "main_dashboard",
-  "version": 101,
+  "version": 102,
   "weekStart": ""
 }
 

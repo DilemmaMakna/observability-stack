@@ -888,7 +888,7 @@
             "uid": "Loki"
           },
           "editorMode": "code",
-          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"}",
+          "expr": "{service_name=~\"$container\", level=~\"(?i)$level\"} | json | line_format \"[{{.level | upper}}] {{if .body}}{{.body}}{{else}}{{__line__}}\"",
           "refId": "A"
         }
       ],
