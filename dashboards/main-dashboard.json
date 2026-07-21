@@ -38,14 +38,12 @@
       "title": "Incident Room Clock (UTC / Server Time)",
       "type": "grafana-clock-panel",
       "options": {
-        "mode": "24hr",
-        "bgColor": "rgba(0,0,0,0)",
-        "clockType": "digital",
+        "clockType": "24 hour",
+        "mode": "time",
         "timezone": "UTC",
+        "bgColor": "rgba(0,0,0,0)",
         "showSeconds": true,
-        "fontSettings": {
-          "fontSize": "48px"
-        }
+        "fontSize": "48px"
       }
     },
     {
