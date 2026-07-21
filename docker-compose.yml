@@ -1,7 +1,7 @@
 services:
   # Section: Metrics System (Prometheus)
   prometheus:
-    image: prom/prometheus:${PROMETHEUS_VERSION}
+    image: prom/prometheus:${PROMETHEUS_VERSION:-v2.53.0}
     container_name: lemma-prometheus
     restart: unless-stopped
     security_opt:
@@ -31,7 +31,7 @@ services:
 
   # Section: Logs System (Loki)
   loki:
-    image: grafana/loki:${LOKI_VERSION}
+    image: grafana/loki:${LOKI_VERSION:-3.0.0}
     container_name: lemma-loki
     restart: unless-stopped
     security_opt:
@@ -53,7 +53,7 @@ services:
 
   # Section: Unified Log Collector (Grafana Alloy)
   alloy:
-    image: grafana/alloy:${ALLOY_VERSION}
+    image: grafana/alloy:${ALLOY_VERSION:-v1.18.0}
     container_name: lemma-alloy
     user: root
     restart: unless-stopped
@@ -75,7 +75,7 @@ services:
 
   # Section: Host Metrics Exporter
   node-exporter:
-    image: prom/node-exporter:${NODE_EXPORTER_VERSION}
+    image: prom/node-exporter:${NODE_EXPORTER_VERSION:-v1.8.2}
     container_name: lemma-node-exporter
     restart: unless-stopped
     security_opt:
@@ -100,7 +100,7 @@ services:
 
   # Section: Container Metrics Exporter
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION}
+    image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-v0.49.1}
     container_name: lemma-cadvisor
     restart: unless-stopped
     security_opt:
@@ -124,7 +124,7 @@ services:
 
   # Section: Visualization (Grafana)
   grafana:
-    image: grafana/grafana:${GRAFANA_VERSION}
+    image: grafana/grafana:${GRAFANA_VERSION:-11.1.0}
     container_name: lemma-grafana
     restart: unless-stopped
     security_opt:
