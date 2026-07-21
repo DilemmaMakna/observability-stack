@@ -3,8 +3,6 @@ services:
   prometheus:
     image: prom/prometheus:${PROMETHEUS_VERSION:-v2.53.0}
     container_name: lemma-prometheus
-    labels:
-      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -29,14 +27,13 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
+      - '--web.enable-remote-write-receiver'
 
 
   # Section: Logs System (Loki)
   loki:
     image: grafana/loki:${LOKI_VERSION:-3.0.0}
     container_name: lemma-loki
-    labels:
-      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -59,14 +56,16 @@ services:
   alloy:
     image: grafana/alloy:${ALLOY_VERSION:-v1.18.0}
     container_name: lemma-alloy
-    labels:
-      logging: "true"
     user: root
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
     networks:
       - monitor-net
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "12345:12345" # Alloy UI
     logging:
       driver: "json-file"
       options:
@@ -74,7 +73,6 @@ services:
         max-file: "3"
     volumes:
       - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - alloy-data:/var/lib/alloy/data
     command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
 
@@ -83,8 +81,6 @@ services:
   node-exporter:
     image: prom/node-exporter:${NODE_EXPORTER_VERSION:-v1.8.2}
     container_name: lemma-node-exporter
-    labels:
-      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -110,8 +106,6 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:${CADVISOR_VERSION:-v0.49.1}
     container_name: lemma-cadvisor
-    labels:
-      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -136,8 +130,6 @@ services:
   grafana:
     image: grafana/grafana:${GRAFANA_VERSION:-11.1.0}
     container_name: lemma-grafana
-    labels:
-      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -165,8 +157,6 @@ services:
   renderer:
     image: grafana/grafana-image-renderer:latest
     container_name: lemma-renderer
-    labels:
-      logging: "true"
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
