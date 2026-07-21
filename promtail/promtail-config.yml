@@ -55,9 +55,8 @@ scrape_configs:
       # Step 1: Docker Format Wrapper Parser (Gets Timestamp, Stream, And Log Fields)
       - docker: {}
 
-      # Step 2: Try Parsing 'log' Payload As JSON (Common For Backend And AI Apps)
+      # Step 2: Try Parsing Message Payload As JSON (Common For Backend And AI Apps)
       - json:
-          source: log
           expressions:
             json_level: level
             json_lvl: lvl
@@ -67,10 +66,8 @@ scrape_configs:
 
       # Step 3: Regular Expression Fallback For Log Levels (Logfmt Or Plain Text)
       - regex:
-          source: log
           expression: '(?i)level=(?P<regex_level>[a-zA-Z]+)'
       - regex:
-          source: log
           expression: '(?i)\[?(?P<bracket_level>INFO|WARN|ERROR|DEBUG|FATAL|CRITICAL|WARNING)\]?'
 
       # Step 4: Normalization And Consolidation Of Extracted Fields
