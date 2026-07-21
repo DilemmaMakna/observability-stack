@@ -28,14 +28,6 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
       - '--web.enable-remote-write-receiver'
-    # Note: prometheus image is distroless (no shell/curl/wget).
-    # Health check via process check since HTTP tools unavailable.
-    healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:2382'"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
 
 
   # Section: Logs System (Loki)
@@ -58,14 +50,6 @@ services:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki-data:/loki
     command: -config.file=/etc/loki/loki-config.yml
-    # Note: loki image is distroless (no shell/curl/wget).
-    # Health check via process check since HTTP tools unavailable.
-    healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:0C1C'"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
 
 
   # Section: Unified Log Collector (Grafana Alloy)
@@ -129,13 +113,6 @@ services:
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
       - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
-    # Note: node-exporter image is distroless (no shell/curl/wget).
-    healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:238C'"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
 
 
   # Section: Container Metrics Exporter
@@ -196,11 +173,11 @@ services:
       - GF_INSTALL_PLUGINS=grafana-clock-panel,yesoreyeram-infinity-datasource,marcusolsson-dynamictext-panel
     depends_on:
       prometheus:
-        condition: service_healthy
+        condition: service_started
       loki:
-        condition: service_healthy
+        condition: service_started
       tempo:
-        condition: service_healthy
+        condition: service_started
       alloy:
         condition: service_started
     healthcheck:
@@ -255,14 +232,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    # Note: tempo image is distroless (no shell/curl/wget).
-    # Health check via process check since HTTP tools unavailable.
-    healthcheck:
-      test: ["CMD-SHELL", "cat /proc/net/tcp | grep -q '00000000:0C80'"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
 
 networks:
   monitor-net:
